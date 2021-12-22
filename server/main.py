@@ -1,5 +1,5 @@
+from src import CookieDB
 from colorama import Fore
-from cookiedb import *
 import fastapi
 import time
 import os
@@ -42,17 +42,28 @@ def initialize(max_cap):
 
 @app.get('/databases')
 def databases():
-    return cookiedb.Database().find()
+    return cookiedb.database.find()
 
 @app.get('/database/{name}')
 def database(name):
-    return cookiedb.Database().find_one(name)
+    return cookiedb.database.find_one(name)
 
 @app.get('/databases/create/{name}')
 def create_database(name):
-    return cookiedb.Database().create(name)
+    return cookiedb.database.create(name)
 
 @app.get('/databases/delete/{name}')
 def delete_database(name):
-    return cookiedb.Database().delete(name)
+    return cookiedb.database.delete(name)
 
+@app.get('/collections/{database}')
+def collections(database):
+    return cookiedb.collection.find_collections(database)
+
+@app.get('/collection/{database}/{name}')
+def collection(database, name):
+    return cookiedb.collection.find_collection(name, database)
+
+@app.get('/collections/create/{database}/{name}')
+def create_collection(database, name):
+    return cookiedb.collection.create(name, database)

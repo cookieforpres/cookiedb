@@ -1,6 +1,7 @@
 .idea/
 .vscode/
 server/test/
+server/database/
 package/test
 
 ### Python template
