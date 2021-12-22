@@ -1,0 +1,17 @@
+{
+    "max_size": 512000,
+    "size": 712,
+    "databases": [
+        {
+            "id": "16b194437b5646e7aa28c9a377ffff4b",
+            "name": "testing",
+            "capped": false,
+            "capped_amount": 512,
+            "collections": [],
+            "created_at": "2021-12-21 18:59:00.868638",
+            "updated_at": "2021-12-21 18:59:00.868663"
+        }
+    ],
+    "created_at": "2021-12-21 18:58:43.414115",
+    "updated_at": "2021-12-21 18:58:43.414128"
+}

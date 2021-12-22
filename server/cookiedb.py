@@ -34,9 +34,9 @@ class CookieDB:
                 data = {
                     'max_size': max_size,
                     'size': 0,
+                    'databases': [],
                     'created_at': str(datetime.datetime.now()),
-                    'updated_at': str(datetime.datetime.now()),
-                    'databases': []
+                    'updated_at': str(datetime.datetime.now())
                 }
 
                 json.dump(data, f, indent=4)
@@ -58,12 +58,6 @@ class CookieDB:
             dir = '/'.join(dir)
             file = dir + f'/databases/'
 
-            if os.path.exists(f'{dir}/databases/'):
-                self.initialized = True
-
-            else:
-                print('you can only make an request to /initialize because you haven\'t initialized the server app')
-
             json_file = open(f'{dir}/databases/databases.json', 'r+')
             json_data = json.load(json_file)
             size = 0
@@ -82,8 +76,6 @@ class CookieDB:
                 f.close()
 
         def create(self, name: str, capped: bool=False, capped_amount: int=512):
-            self.__refresh_database_info()
-
             database = {
                 'id': str(uuid.uuid4()).replace('-', ''),
                 'name': name, 'capped': capped,
@@ -126,11 +118,10 @@ class CookieDB:
             except json.decoder.JSONDecodeError:
                 return {'message': 'error parsing data [2]'}
 
+            self.__refresh_database_info()
             return {'message': 'database created', 'database': database}
 
         def delete(self, name: str):
-            self.__refresh_database_info()
-
             dir = os.path.join((__file__).replace('./', '')).split('/')[:-1]
             dir = '/'.join(dir)
             file = dir + f'/databases/{name}'
@@ -167,14 +158,13 @@ class CookieDB:
                     json.dump(json_data, f, indent=4)
                     f.close()
 
+                self.__refresh_database_info()
                 return {'message': 'database deleted'}
 
             else:
                 return {'message': 'cant find database'}
 
         def find(self):
-            self.__refresh_database_info()
-
             dir = os.path.join((__file__).replace('./', '')).split('/')[:-1]
             dir = '/'.join(dir)
             file = dir + f'/databases/databases.json'
@@ -182,11 +172,10 @@ class CookieDB:
             json_data = open(file, 'r+')
             json_data = json.load(json_data)
 
+            self.__refresh_database_info()
             return {'message': 'databases found', 'databases': json_data['databases']}
 
         def find_one(self, name: str):
-            self.__refresh_database_info()
-
             dir = os.path.join((__file__).replace('./', '')).split('/')[:-1]
             dir = '/'.join(dir)
             file = dir + f'/databases/{name}'
@@ -196,6 +185,7 @@ class CookieDB:
                     data = json.load(f)
                     f.close()
 
+                    self.__refresh_database_info()
                     return {'message': 'database found', 'database': data}
 
             else:
@@ -211,12 +201,6 @@ class CookieDB:
             dir = os.path.join((__file__).replace('./', '')).split('/')[:-1]
             dir = '/'.join(dir)
             file = dir + f'/databases/'
-
-            if os.path.exists(f'{dir}/databases/'):
-                self.initialized = True
-
-            else:
-                print('you can only make an request to /initialize because you haven\'t initialized the server app')
 
             for base, dirs, files in os.walk(file):
                 self.database_count = len(dirs)
