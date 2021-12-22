@@ -12,9 +12,9 @@ class Database:
         self.__refresh_database_info()
 
     def __refresh_database_info(self):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
-        file = dir + f'/databases/'
+        file = f'{dir}/databases/'
 
         json_file = open(f'{dir}/databases/databases.json', 'r+')
         json_data = json.load(json_file)
@@ -24,7 +24,7 @@ class Database:
             self.database_count = len(dirs)
 
             for f in files:
-                if f != 'databases.json':
+                if f != 'databases.json' or f != 'database.json':
                     fp = os.path.join(base, f)
                     size += os.path.getsize(fp)
 
@@ -44,9 +44,9 @@ class Database:
             'updated_at': str(datetime.datetime.now())
         }
 
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
-        file = dir + f'/databases/{name}'
+        file = f'{dir}/databases/{name}'
 
         if not os.path.exists(file):
             os.mkdir(file)
@@ -82,9 +82,9 @@ class Database:
         return {'message': 'database created', 'database': database}
 
     def delete(self, name: str):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
-        file = dir + f'/databases/{name}'
+        file = f'{dir}/databases/{name}'
 
         if os.path.exists(file):
             shutil.rmtree(file)
@@ -125,9 +125,9 @@ class Database:
             return {'message': 'cant find database'}
 
     def find(self):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
-        file = dir + f'/databases/databases.json'
+        file = f'{dir}/databases/databases.json'
 
         json_data = open(file, 'r+')
         json_data = json.load(json_data)
@@ -140,9 +140,9 @@ class Database:
         return {'message': 'databases found', 'databases': databases_names}
 
     def find_one(self, name: str):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
-        file = dir + f'/databases/{name}'
+        file = f'{dir}/databases/{name}'
 
         if os.path.exists(file):
             with open(f'{file}/database.json', 'r+') as f:

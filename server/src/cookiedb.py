@@ -13,7 +13,7 @@ class CookieDB:
         self.collection = Collection()
 
     def __refresh_database_info(self):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
         file = dir + f'/databases/'
 
@@ -25,7 +25,7 @@ class CookieDB:
             self.database_count = len(dirs)
 
             for f in files:
-                if f != 'databases.json':
+                if f != 'databases.json' or f != 'database.json':
                     fp = os.path.join(base, f)
                     size += os.path.getsize(fp)
 
@@ -37,7 +37,7 @@ class CookieDB:
             f.close()
 
     def initialize(self, max_size: int):
-        dir = os.path.join((__file__).replace('./', '')).split('/')[:-2]
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
         dir = '/'.join(dir)
         file = dir + f'/databases/'
 

@@ -1,13 +1,13 @@
-from src import CookieDB
+from fastapi import FastAPI, Request
 from colorama import Fore
-import fastapi
+from src import CookieDB
 import time
 import os
 
 HOST = '127.0.0.1'
 PORT = 33940
 
-app = fastapi.FastAPI()
+app = FastAPI()
 cookiedb = CookieDB()
 clear_console = lambda: os.system('cls' if os.name in ('nt', 'dos') else 'clear')
 
@@ -37,33 +37,47 @@ print(f'║ Start: {Fore.LIGHTMAGENTA_EX}{start}{Fore.RESET}                    
 print(f'╚════════════════════════════════════════╝')
 
 @app.get('/initialize/{max_cap}')
-def initialize(max_cap):
-    return cookiedb.initialize(int(max_cap))
+def initialize(max_cap: int):
+    return cookiedb.initialize(max_cap)
 
 @app.get('/databases')
 def databases():
     return cookiedb.database.find()
 
-@app.get('/database/{name}')
-def database(name):
-    return cookiedb.database.find_one(name)
+@app.get('/database/{database}')
+def database(database: str):
+    return cookiedb.database.find_one(database)
 
-@app.get('/databases/create/{name}')
-def create_database(name):
-    return cookiedb.database.create(name)
+@app.get('/databases/create/{database}')
+def create_database(database: str):
+    return cookiedb.database.create(database)
 
-@app.get('/databases/delete/{name}')
-def delete_database(name):
-    return cookiedb.database.delete(name)
+@app.get('/databases/delete/{database}')
+def delete_database(database: str):
+    return cookiedb.database.delete(database)
 
 @app.get('/collections/{database}')
-def collections(database):
+def collections(database: str):
     return cookiedb.collection.find_collections(database)
 
-@app.get('/collection/{database}/{name}')
-def collection(database, name):
-    return cookiedb.collection.find_collection(name, database)
+@app.get('/collection/{database}/{collection}')
+def collection(database: str, collection: str):
+    return cookiedb.collection.find_collection(collection, database)
 
-@app.get('/collections/create/{database}/{name}')
-def create_collection(database, name):
-    return cookiedb.collection.create(name, database)
+@app.get('/collections/create/{database}/{collection}')
+def create_collection(database: str, collection: str):
+    return cookiedb.collection.create_collection(collection, database)
+
+@app.get('/collections/delete/{database}/{collection}')
+def delete_collection(database: str, collection: str):
+    return cookiedb.collection.delete_collection(collection, database)
+
+@app.get('/collection/insert-one/{database}/{collection}')
+async def insert_one_collection(req: Request, database: str, collection: str):
+    document = await req.json()
+    return cookiedb.collection.insert_one(collection, database, document)
+
+@app.get('/collection/insert-many/{database}/{collection}')
+async def insert_one_collection(req: Request, database: str, collection: str):
+    document = await req.json()
+    return cookiedb.collection.insert_many(collection, database, document)
