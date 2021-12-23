@@ -8,8 +8,7 @@ import os
 class Database:
     def __init__(self):
         self.database_count = 0
-        self.initialized = True
-        self.__refresh_database_info()
+        self.size = 0
 
     def __refresh_database_info(self):
         dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
@@ -27,6 +26,8 @@ class Database:
                 if f != 'databases.json' or f != 'database.json':
                     fp = os.path.join(base, f)
                     size += os.path.getsize(fp)
+
+        self.size = size
 
         json_data['size'] = size
         json_data['updated_at'] = str(datetime.datetime.now())

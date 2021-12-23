@@ -8,8 +8,31 @@ import os
 class Collection:
     def __init__(self):
         self.database_count = 0
-        self.initialized = False
-        self.__refresh_database_info()
+        self.size = 0
+
+    def __update_database_file(self, database_file: str):
+        with open(f'{database_file}/database.json', 'r+') as f:
+            database_update_file = json.load(f)
+            f.close()
+
+            database_update_file['updated_at'] = str(datetime.datetime.now())
+            file = open(f'{database_file}/database.json', 'w+')
+            json.dump(database_update_file, file, indent=4)
+            file.close()
+
+            self.__refresh_database_info()
+
+    def __update_collection_file(self, collection_file: str):
+        with open(f'{collection_file}/collection.json', 'r+') as f:
+            collection_update_file = json.load(f)
+            f.close()
+
+            collection_update_file['updated_at'] = str(datetime.datetime.now())
+            file = open(f'{collection_file}/collection.json', 'w+')
+            json.dump(collection_update_file, file, indent=4)
+            file.close()
+
+            self.__refresh_database_info()
 
     def __refresh_database_info(self):
         dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
@@ -27,6 +50,8 @@ class Collection:
                 if f != 'databases.json' or f != 'database.json':
                     fp = os.path.join(base, f)
                     size += os.path.getsize(fp)
+
+        self.size = size
 
         json_data['size'] = size
         json_data['updated_at'] = str(datetime.datetime.now())
@@ -124,9 +149,15 @@ class Collection:
         collection_file = f'{dir}/databases/{database}/{name}'
 
         if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
             if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
                 with open(f'{collection_file}/collection.json', 'r+') as f:
                     collection = json.load(f)
+                    collection['documents'] = len(collection['documents'])
+                    # del collection['documents']
                     f.close()
 
                     self.__refresh_database_info()
@@ -145,7 +176,11 @@ class Collection:
         collection_file = f'{dir}/databases/{database}/{name}'
 
         if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
             if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
                 shutil.rmtree(collection_file)
 
                 self.__refresh_database_info()
@@ -172,7 +207,11 @@ class Collection:
             document = new_document
 
         if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
             if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
                 if os.path.exists(f'{collection_file}/collection.json'):
                     file = open(f'{collection_file}/collection.json', 'r+')
                     json_data = json.load(file)
@@ -227,7 +266,11 @@ class Collection:
                 new_documents.append(doc)
 
         if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
             if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
                 if os.path.exists(f'{collection_file}/collection.json'):
                     file = open(f'{collection_file}/collection.json', 'r+')
                     json_data = json.load(file)
@@ -264,20 +307,164 @@ class Collection:
         else:
             return {'message': 'cant find database'}
 
-    def delete_one(self):
-        pass
+    def delete_one(self, collection: str, database: str, filter: dict):
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
+        dir = '/'.join(dir)
+        database_file = f'{dir}/databases/{database}'
+        collection_file = f'{dir}/databases/{database}/{collection}'
 
-    def delete_many(self):
-        pass
+        if os.path.exists(database_file):
+            self.__update_database_file(database_file)
 
-    def find_one(self):
-        pass
+            if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
 
-    def find_many(self):
-        pass
+                if os.path.exists(f'{collection_file}/collection.json'):
+                    file = open(f'{collection_file}/collection.json', 'r+')
+                    json_data = json.load(file)
+                    file.close()
 
-    def update_one(self):
-        pass
+                    count = 0
+                    for doc in json_data['documents']:
+                        for key in filter.keys():
+                            if doc[key] == filter[key]:
+                                json_data['documents'].pop(count)
+                                break
 
-    def update_many(self):
-        pass
+                        count += 1
+
+                    with open(f'{collection_file}/collection.json', 'w+') as f:
+                        json.dump(json_data, f, indent=4)
+
+                    file = open(f'{database_file}/database.json')
+                    json_data = json.load(file)
+                    file.close()
+
+                    count = 0
+                    for col in json_data['collections']:
+                        for doc in col['documents']:
+                            for key in filter.keys():
+                                if doc[key] == filter[key]:
+                                    col['documents'].pop(count)
+                                    break
+
+                            count += 1
+
+                    with open(f'{database_file}/database.json', 'w+') as f:
+                        json.dump(json_data, f, indent=4)
+
+                    self.__refresh_database_info()
+                    return {'message': 'document deleted'}
+
+                else:
+                    return {'message': 'cant find collection data file'}
+
+            else:
+                return {'message': 'cant find collection'}
+
+        else:
+            return {'message': 'cant find database'}
+
+    def find_one(self, collection: str, database: str, filter: dict):
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
+        dir = '/'.join(dir)
+        database_file = f'{dir}/databases/{database}'
+        collection_file = f'{dir}/databases/{database}/{collection}'
+
+        if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
+            if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
+                if os.path.exists(f'{collection_file}/collection.json'):
+                    file = open(f'{collection_file}/collection.json', 'r+')
+                    json_data = json.load(file)
+                    file.close()
+
+                    for doc in json_data['documents']:
+                        if filter in doc:
+                            return {'message': 'document found', 'document': doc}
+
+                    return {'message': 'cant find document'}
+
+                else:
+                    return {'message': 'cant find collection data file'}
+
+            else:
+                return {'message': 'cant find collection'}
+
+        else:
+            return {'message': 'cant find database'}
+
+    def find_many(self, collection: str, database: str, filter: list):
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
+        dir = '/'.join(dir)
+        database_file = f'{dir}/databases/{database}'
+        collection_file = f'{dir}/databases/{database}/{collection}'
+
+        if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
+            if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
+                if os.path.exists(f'{collection_file}/collection.json'):
+                    file = open(f'{collection_file}/collection.json', 'r+')
+                    json_data = json.load(file)
+                    file.close()
+
+                    docs = []
+                    for doc in json_data['documents']:
+                        if filter in doc:
+                            docs.append(doc)
+
+                    return {'message': 'documents found', 'documents': docs}
+
+                else:
+                    return {'message': 'cant find collection data file'}
+
+            else:
+                return {'message': 'cant find collection'}
+
+        else:
+            return {'message': 'cant find database'}
+
+    def update_one(self, collection: str, database: str, filter: dict, fields: dict):
+        dir = os.path.join(__file__.replace('./', '')).split('/')[:-2]
+        dir = '/'.join(dir)
+        database_file = f'{dir}/databases/{database}'
+        collection_file = f'{dir}/databases/{database}/{collection}'
+
+        if os.path.exists(database_file):
+            self.__update_database_file(database_file)
+
+            if os.path.exists(collection_file):
+                self.__update_collection_file(collection_file)
+
+                if os.path.exists(f'{collection_file}/collection.json'):
+                    file = open(f'{collection_file}/collection.json', 'r+')
+                    json_data = json.load(file)
+                    file.close()
+
+                    count = 0
+                    for doc in json_data['documents']:
+                        if filter in doc:
+                            json_data['updated_at'] = str(datetime.datetime.now())
+                            json_data['documents'][count] = {**doc, **fields}
+
+                        count += 1
+
+                    with open(f'{collection_file}/collection.json', 'w+') as f:
+                        json.dump(json_data, f, indent=4)
+
+                        return {'message': 'document updated'}
+
+                else:
+                    return {'message': 'cant find collection data file'}
+
+            else:
+                return {'message': 'cant find collection'}
+
+        else:
+            return {'message': 'cant find database'}

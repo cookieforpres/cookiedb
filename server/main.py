@@ -78,6 +78,15 @@ async def insert_one_collection(req: Request, database: str, collection: str):
     return cookiedb.collection.insert_one(collection, database, document)
 
 @app.get('/collection/insert-many/{database}/{collection}')
-async def insert_one_collection(req: Request, database: str, collection: str):
+async def insert_many_collection(req: Request, database: str, collection: str):
     document = await req.json()
     return cookiedb.collection.insert_many(collection, database, document)
+
+@app.get('/collection/delete-one/{database}/{collection}')
+async def delete_one(req: Request, database: str, collection: str):
+    filter = await req.json()
+    return cookiedb.collection.delete_one(collection, database, filter)
+
+@app.get('/collection/update-one/{database}/{collection}')
+async def update_one(req: Request, database: str, collection: str):
+    filter,

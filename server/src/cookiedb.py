@@ -8,7 +8,6 @@ import os
 class CookieDB:
     def __init__(self):
         self.database_count = 0
-        self.__refresh_database_info()
         self.database = Database()
         self.collection = Collection()
 
